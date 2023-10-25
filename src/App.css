@@ -1,5 +1,5 @@
 .App {
-
+  margin: 50px;
 }
 
 .count {
@@ -27,4 +27,15 @@
 .input-group span {
   width: 150px;
   justify-content: center;
+}
+
+.active {
+  color: white;
+  background-color: skyblue;
+}
+
+a {
+  text-decoration: none !important;
+  font-size: 1.5rem;
+  padding: 5px;
 }

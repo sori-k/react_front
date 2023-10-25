@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react'
 import {Table, Button, Spinner} from 'react-bootstrap'
 
 const Posts = () => {
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState([]); //useState -> 값을 저장할 수 있는 변수 (배열, 객체, 숫자/문자, 배열안 오프젝트까지 모두 저장가능)
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
 
     const getPosts = () =>{
-        setLoading(true);
-        fetch('https://jsonplaceholder.typicode.com/posts')
-        .then(response => response.json())
+        setLoading(true); //로딩중
+        fetch('https://jsonplaceholder.typicode.com/posts') //fetcn (자바스크립트 함수) / $.ajax (제이쿼리 함수)
+        .then(response => response.json()) //response 타입을 json으로 바꿔서 넣어준다.
         .then(json => {
             const start = (page-1)*10 + 1;
             const end = page*10;
@@ -20,7 +20,7 @@ const Posts = () => {
             console.log(newJson);
 
             setPosts(newJson);
-            setLoading(false);
+            setLoading(false); //로딩 끝
         });
     }
 
@@ -34,7 +34,7 @@ const Posts = () => {
 
     useEffect(() =>{
         getPosts();
-    }, [page]);
+    }, [page]); //page가 바뀔때마다 호출하기
 
     if(loading) return(
         <div className='text-center'>
