@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Table, Spinner, Button, Form, InputGroup, Row, Col } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom';
+import LocalMadal from './LocalMadal';
 
 const LocalSearch = () => {
     const [locals, setLocals] = useState([]);
@@ -63,7 +64,7 @@ const LocalSearch = () => {
                                     <InputGroup>
                                         <Form.Control onChange={(e)=> setQuery(e.target.value)}
                                             value={query}/>
-                                        <Button type="submit">검색</Button>
+                                        <Button type="submit" variant='success'>검색</Button>
                                     </InputGroup>
                                 </form>
                             </Col>
@@ -79,6 +80,7 @@ const LocalSearch = () => {
                                 <td>지역명</td>
                                 <td>주소</td>
                                 <td>전화번호</td>
+                                <td>위치보기</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,16 +89,17 @@ const LocalSearch = () => {
                                     <td>{local.id}:{local.place_name}</td>
                                     <td>{local.address_name}</td>
                                     <td>{local.phone}</td>
+                                    <td><LocalMadal local={local}/></td>
                                 </tr>
                             )}
                         </tbody>
                     </Table>
                     <div className='text-center'>
                         <Button onClick={()=> navigator(`/local?page=${page-1}&query=${query}`)}
-                            disabled={page===1}>이전</Button>
+                            disabled={page===1} variant='outline-success'>이전</Button>
                         <span className='mx-3'> {page} / {Math.ceil(total/5)}</span>
                         <Button onClick={()=> navigator(`/local?page=${page+1}&query=${query}`)}
-                            disabled={end}>다음</Button>
+                            disabled={end} variant='outline-success'>다음</Button>
                     </div>
                 </>
             }
@@ -105,3 +108,6 @@ const LocalSearch = () => {
 }
 
 export default LocalSearch
+
+//검색은 REST API키
+//지도는 Javascript키 ->카카오개발자센터 내애플리케이션 내 플랫폼 등록되어있어야 나옴
