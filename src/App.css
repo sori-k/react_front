@@ -29,13 +29,36 @@
   justify-content: center;
 }
 
+
 .active {
   color: white;
-  background-color: skyblue;
+  
 }
+
 
 a {
   text-decoration: none !important;
   font-size: 1.5rem;
   padding: 5px;
+}
+
+.home {
+  font-size: 1.0rem;
+  color: white;
+}
+
+.navbar-nav .active {
+  color: white;
+}
+
+.navbar-nav a {
+  color: gray;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
