@@ -18,7 +18,7 @@ const BookList = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
-
+    const [chcnt, setChcnt] = useState(0);
 
     const getBooks = async() => {
         const url=`/books/list.json?query=${query}&page=${page}&size=${size}`;
@@ -28,7 +28,9 @@ const BookList = () => {
         console.log(res);
         //console.log(res.data);
         
-        setBooks(res.data.list);
+        let list = res.data.list;
+        list = list.map(book => book && {...book, checked:false});
+        setBooks(list);
         setTotal(res.data.total);
         setLoading(false);
     }
@@ -57,6 +59,42 @@ const BookList = () => {
             getBooks();
         }
     }
+    //삭제 checkbox
+
+    const onChangeAll = (e) => {
+        const list = books.map(book => book && {...book, checked:e.target.checked});
+        setBooks(list);
+    }
+
+    const onChangeSingle = (e, bid) => {
+        const list = books.map(book => book.BID === bid ? {...book, checked:e.target.checked} : book);
+        setBooks(list);
+    }
+
+    useEffect(()=> {
+        let cnt = 0;
+        books.forEach(book=> book.checked && cnt++);
+        setChcnt(cnt);
+    }, [books]);
+
+    const onChangeDelete = async() => {
+        if(chcnt == 0){
+            alert();
+        }else{
+            let count = 0;
+            if(window.confirm(`${chcnt}권 도서를 삭제할까요?`)){
+                for(const book of books){
+                    if(book.checked){
+                        const res = await axios.post('/books/delete', {bid: book.BID});
+                        if(res.data === 1) count++;
+                    }
+                }
+
+                alert(`${count}권 도서삭제!`);
+                navi(`${path}?page=1&query=${query}&size=${size}`);
+            }
+        }
+    }
 
 
     if(loading) return <div className='my-5 text-center'><Spinner/></div>
@@ -74,6 +112,7 @@ const BookList = () => {
                     </form>
                 </Col>
                 <Col className='mt-1'>검색수: {total}권</Col>
+                <Col className='text-end'><Button size="sm" onClick={onChangeDelete} variant='secondary'>선택삭제</Button></Col>
             </Row>
             <hr/>
             <Table>
@@ -86,6 +125,7 @@ const BookList = () => {
                         <th>가격</th>
                         <th>등록일</th>
                         <th>삭제</th>
+                        <th><input type="checkbox" onChange={onChangeAll} checked={books.length === chcnt}/></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,6 +139,7 @@ const BookList = () => {
                             <td>{book.fmtdate}</td>
                             <td><Button onClick={()=> onDelete(book.BID)}
                                 size="sm" variant='danger' >삭제</Button></td>
+                            <td><input type="checkbox" checked={book.checked} onChange={(e)=> {onChangeSingle(e, book.BID)}}/></td>
                         </tr>    
                     )}
                 </tbody>
