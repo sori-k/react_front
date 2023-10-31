@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { Spinner, Table, Row, Col, InputGroup, Form, Button } from 'react-bootstrap';
 import Pagination from 'react-js-pagination';
 import '../Pagination.css';
+
 
 const BookList = () => {
     const size=5;
@@ -133,8 +134,14 @@ const BookList = () => {
                         <tr key={book.BID}>
                             <td>{book.BID}</td>
                             <td><img src={book.IMAGE || "http://via.placeholder.com/170x200"} width="30"/></td>
-                            <td width="30%"><div className='ellipsis'>{book.TITLE}</div></td>
-                            <td width="30%"><div className='ellipsis'>{book.AUTHORS}</div></td>
+                            <td width="30%">
+                                <div className='ellipsis'>
+                                    <NavLink to={`/books/read/${book.BID}`}>{book.TITLE}</NavLink>
+                                    <span>리뷰: {book.rcnt}</span>
+                                    <span>좋아요: {book.fcnt}</span>
+                                </div>
+                            </td>
+                            <td width="20%"><div className='ellipsis'>{book.AUTHORS}</div></td>
                             <td>{book.fmtprice}원</td>
                             <td>{book.fmtdate}</td>
                             <td><Button onClick={()=> onDelete(book.BID)}

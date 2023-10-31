@@ -64,5 +64,16 @@ a {
 }
 
 .photo {
-  border-radius: 20px;
+  border-radius: 40%;
+  cursor: pointer;
+}
+
+.heart {
+  color: red;
+  cursor: pointer;
+}
+
+.rcnt, .fcnt {
+  color: rgb(10, 10, 41);
+  font-size: 0.8rem;
 }

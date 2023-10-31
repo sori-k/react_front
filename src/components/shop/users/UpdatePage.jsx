@@ -43,6 +43,7 @@ const UpdatePage = () => {
     const onUpdate = async(e) => {
         e.preventDefault();
         if(window.confirm('정보를 수정할까요?')){
+            console.log(user);
             const res= await axios.post('/users/update', user);
             if(res.data == 1) {
                 alert("정보가 수정되었습니다.");
