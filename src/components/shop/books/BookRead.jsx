@@ -19,10 +19,13 @@ const BookRead = () => {
         isbn:'',
         regdate:'',
         fmtdate:'',
-        file:null
+        file:null,
+        ucnt:0,
+        rcnt:0,
+        fcnt:0
     });
 
-    const {TITLE, PRICE, fmtprice, AUTHORS, CONTENTS, PUBLISHER, IMAGE, ISBN, REGDATE, fmtdate, file} = book;
+    const {TITLE, PRICE, fmtprice, AUTHORS, CONTENTS, PUBLISHER, IMAGE, ISBN, REGDATE, fmtdate, file, ucnt, rcnt, fcnt} = book;
 
     const getBook = async() => {
         setLoading(true);
@@ -94,8 +97,12 @@ const BookRead = () => {
                                 <div>출판사: {PUBLISHER}</div>
                                 <div>ISBN: {ISBN}</div>
                                 <div>등록일: {fmtdate}</div>
+                                <hr/>
+                                <div>
+                                    {fcnt} : {ucnt} : {rcnt}
+                                </div>
                                 <NavLink to={`/books/update/${bid}`}>
-                                    <Button className='bt-3 px-5' size="sm" variant='outline-success'>정보수정</Button>
+                                    <Button className='mt-2 px-5' size="sm" variant='outline-success'>정보수정</Button>
                                 </NavLink>
                             </Col>
                         </Row>
