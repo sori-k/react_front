@@ -1,9 +1,12 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Table, Button, Form, Row, Col, Spinner, InputGroup } from 'react-bootstrap'
+import { BoxContext } from '../BoxContext';
 
 const BookSearch = () => {
+    const {box, setBox} = useContext(BoxContext);
+
     const location = useLocation(); //현재 path와 query를 받아온다.
     const path = location.pathname;
     const navi = useNavigate();
@@ -53,13 +56,15 @@ const BookSearch = () => {
     const onSearch = (e) => {
         e.preventDefault();
         if(query == ""){
-            alert("검색어를 입력하세요.");
+            //alert("검색어를 입력하세요.");
+            setBox({show: true, message: '검색어를 입력하세요.'});
         }else{
             navi(`${path}?query=${query}&page=1`);
         }
     }
 
     const onInsert = async(book) => {
+        /*
         if(window.confirm("새로운 도서를 등록할까요?")) {
             //console.log(book);
             const url = "/books/insert"
@@ -71,6 +76,21 @@ const BookSearch = () => {
                 alert("이미 등록된 도서입니다.");
             }
         }
+        */
+        setBox({
+            show: true,
+            message: '새로운 도서를 등록할까요?',
+            action: async() => {
+                const url = "/books/insert"
+                const res = await axios.post(url, {...book, authors:book.authors.join()});
+                if(res.data === 0) {
+                    setBox({show: true, message:'도서가 등록되었습니다.'});
+                }else{
+                    //alert("이미 등록된 도서입니다.");
+                    setBox({show: true, message:'이미 등록된 도서입니다.'});
+                }
+            }
+        });
     }
 
     const onChangeAll = (e) => {
@@ -86,8 +106,10 @@ const BookSearch = () => {
 
     const onClickSave = async() => {
         if(chcnt === 0) {
-            alert("저장할 도서들을 선택하세요!");
+            //alert("저장할 도서들을 선택하세요!");
+            setBox({show: true, message:'저장할 도서들을 선택하세요!'});
         }else {
+            /*
             if(window.confirm(`${chcnt}권 도서를 저장할까요?`)){
                 let count = 0;
                 for(const book of books){
@@ -102,6 +124,24 @@ const BookSearch = () => {
                 alert(`${count}권 저장되었습니다.`);
                 setBooks(books.map(book => book && {...book, checked:false}));
             }
+            */
+           setBox({
+                show: true,
+                message: `${chcnt}권 도서를 저장할까요?`,
+                action: async() => {
+                    let count = 0;
+                    for(const book of books){
+                        if(book.checked){
+                            //도서저장
+                            const url = "/books/insert"
+                            const res = await axios.post(url, {...book, authors:book.authors.join()});
+                            if(res.data === 0) count++;
+                        }
+                    };
+                    setBox({show: true, message:`${count}권 저장되었습니다.`});
+                    setBooks(books.map(book => book && {...book, checked:false}));
+                }
+           })
         }
     }
 

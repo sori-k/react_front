@@ -1,9 +1,10 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Button, Form, Row, Col } from 'react-bootstrap'
 import { useParams } from 'react-router-dom';
 import Pagination from 'react-js-pagination';
 import '../Pagination.css';
+import {BoxContext} from '../BoxContext';
 
 const ReviewPage = ({location, setBook, book}) => {
     const [reviews, setReviews] = useState([]);
@@ -12,6 +13,8 @@ const ReviewPage = ({location, setBook, book}) => {
     const {bid} = useParams();
     const [total, setTotal] = useState(0);
     const [contents, setContents] = useState('');
+
+    const {box, setBox} = useContext(BoxContext);
     
     const getReviews = async() => {
         const url = `/review/list.json?page=${page}&size=${size}&bid=${bid}`;
@@ -43,9 +46,13 @@ const ReviewPage = ({location, setBook, book}) => {
         setReviews(list);
     }
 
+    //리뷰 등록버튼 눌렀을 때
     const onClickRegister = async()  => {
         if(contents == ""){
-            alert("리뷰 내용을 입력하세요.");
+            setBox({
+                show: true,
+                message: '내용을 입력하세요!'
+            });
         }else{
             const res = await axios.post('/review/insert', {
                 uid:sessionStorage.getItem("uid"),
@@ -61,6 +68,7 @@ const ReviewPage = ({location, setBook, book}) => {
     }
 
     const onClickDelete = async(rid) => {
+        /*
         if(window.confirm(`${rid}번 리뷰를 삭제할까요?`)){
             const res = await axios.post('/review/delete', {rid});
 
@@ -68,6 +76,17 @@ const ReviewPage = ({location, setBook, book}) => {
                 getReviews();
             }
         }
+        */
+       setBox({
+            show: true,
+            message: `${rid}번 리뷰를 삭제할까요?`,
+            action: async() => {
+                const res = await axios.post('/review/delete', {rid});
+                if(res.data === 1){
+                    getReviews();
+                }
+            }
+       })
     }
 
     //리뷰 수정버튼 눌렀을 때,
@@ -84,21 +103,44 @@ const ReviewPage = ({location, setBook, book}) => {
 
 
     //리뷰 수정취소 버튼 눌렀을 때,
-    const onClickCancel = (rid) => {
-        const list = reviews.map(r=> r.rid === rid ? {...r, edit:false, text:r.contents} : r);
-        setReviews(list);
+    const onClickCancel = (rid, text, contents) => {
+        if(text != contents){ // 수정내용과 기존 수정내용이 다르면
+            //if(!window.confirm("취소할까요?")) return;
+            setBox({
+                show: true,
+                message:'취소할까요?',
+                action: () => {
+                    const list = reviews.map(r=> r.rid === rid ? {...r, edit:false, text:r.contents} : r);
+                    setReviews(list);  
+                }
+            })
+        }else{
+            const list = reviews.map(r=> r.rid === rid ? {...r, edit:false, text:r.contents} : r);
+            setReviews(list);    
+        }
     }
 
     //리뷰 수정 저장
     const onClickSave = async(rid, text, contents) => {
         if(text === contents) return;
+        /*
         if(window.confirm("수정할까요?")){
             const res = await axios.post('/review/update', {rid, contents:text});
-            
             if(res.data === 1){
                 getReviews();
             }
         }
+        */
+       setBox({
+            show: true,
+            message:'수정할까요?',
+            action: async() => {
+                const res = await axios.post('/review/update', {rid, contents:text});
+                if(res.data === 1){
+                    getReviews();
+                }
+            }
+       });
     }
 
     return (
@@ -145,7 +187,7 @@ const ReviewPage = ({location, setBook, book}) => {
                                 <div className='text-end'>
                                     <Button onClick={()=> onClickSave(review.rid, review.text, review.contents)}
                                         variant='outline-dark' size="sm me-2">저장</Button>
-                                    <Button onClick={()=> onClickCancel(review.rid)}
+                                    <Button onClick={()=> onClickCancel(review.rid, review.text, review.contents)}
                                         variant='dark' size="sm">취소</Button>
                                 </div>
                             </>
@@ -163,7 +205,7 @@ const ReviewPage = ({location, setBook, book}) => {
                     prevPageText={"‹"}
                     nextPageText={"›"}
                     onChange={onChangePage}/>
-            }    
+            }
         </div>
     )
 }

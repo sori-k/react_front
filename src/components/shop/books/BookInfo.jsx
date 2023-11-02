@@ -1,12 +1,14 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Spinner, Row, Col, Card, Button, Tab, Tabs } from 'react-bootstrap';
 import { BsFillSuitHeartFill, BsSuitHeart } from 'react-icons/bs'
 import { BiMessageDetail } from 'react-icons/bi'
 import ReviewPage from './ReviewPage';
+import { BoxContext } from '../BoxContext';
 
 const BookInfo = () => {
+    const {setBox} = useContext(BoxContext);
     const navi = useNavigate();
     const location = useLocation();
     //console.log('.............', location.pathname);
@@ -42,6 +44,22 @@ const BookInfo = () => {
         getBook();
     }
 
+    //장바구니 눌렀을 때
+    const onClickCart = async() => {
+        const res = await axios.post('/cart/insert', {bid, uid:sessionStorage.getItem("uid")});
+        setBox({
+            show: true,
+            message: res.data === 0 ? 
+                    `장바구니에 등록되었습니다.\n 쇼핑을 계속 할까요?`
+                    : 
+                    `이미 장바구니에 존재합니다. \n 장바구니로 이동할까요?`,
+            action: () => {
+                window.location.href='/';
+            }
+        });
+    
+    }
+
     if(loading) return <div className='text-center my-5'><Spinner/></div>
     return (
         <div className='my-5'>
@@ -75,10 +93,13 @@ const BookInfo = () => {
                             </span>
                         }
                         <br/>
-                        <div className='mt-3'>
-                            <Button className='me-2' variant='outline-secondary' size="sm">장바구니</Button>
-                            <Button variant='danger' size="sm">바로구매</Button>
-                        </div>
+                        {sessionStorage.getItem("uid") &&
+                            <div className='mt-3'>
+                                <Button onClick={onClickCart}
+                                    className='me-2' variant='outline-secondary' size="sm">장바구니</Button>
+                                <Button variant='danger' size="sm">바로구매</Button>
+                            </div>
+                        }
                     </Col>
                 </Row>
             </Card>

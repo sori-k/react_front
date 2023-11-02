@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { Spinner, Table, Row, Col, InputGroup, Form, Button } from 'react-bootstrap';
 import Pagination from 'react-js-pagination';
 import '../Pagination.css';
+import { BoxContext } from '../BoxContext';
 
 
 const BookList = () => {
+    const {box, setBox} = useContext(BoxContext);
+
     const size=5;
     const location = useLocation();
     const navi = useNavigate();
@@ -50,6 +53,7 @@ const BookList = () => {
     }
 
     const onDelete = async(bid) => {
+        /*
         if(!window.confirm(`${bid}번 도서를 삭제할까요?`)) return;
 
         const res = await axios.post('/books/delete', {bid});
@@ -59,7 +63,23 @@ const BookList = () => {
             alert("삭제 성공!");
             getBooks();
         }
+        */
+        setBox({
+            show: true,
+            message: `${bid}번 도서를 삭제할까요?`,
+            action: async() => {
+                const res = await axios.post('/books/delete', {bid});
+                if(res.data == 0){
+                    setBox({show: true, message: "삭제 실패!"});
+                }else{
+                    setBox({show: true, message: "삭제 성공!"});
+                    getBooks();
+                }
+            }
+        })
     }
+
+    
     //삭제 checkbox
 
     const onChangeAll = (e) => {
@@ -78,11 +98,16 @@ const BookList = () => {
         setChcnt(cnt);
     }, [books]);
 
-    const onChangeDelete = async() => {
+    //체크박스 선택삭제
+    const onClickDelete = async() => {
         if(chcnt == 0){
-            alert();
+            setBox({
+                show: true,
+                message: '삭제할 도서를 선택하세요.'
+            })
         }else{
             let count = 0;
+            /*
             if(window.confirm(`${chcnt}권 도서를 삭제할까요?`)){
                 for(const book of books){
                     if(book.checked){
@@ -94,6 +119,22 @@ const BookList = () => {
                 alert(`${count}권 도서삭제!`);
                 navi(`${path}?page=1&query=${query}&size=${size}`);
             }
+            */
+           setBox({
+                show: true,
+                message: `${chcnt}권 도서를 삭제할까요?`,
+                action: async() => {
+                    for(const book of books){
+                        if(book.checked){
+                            const res = await axios.post('/books/delete', {bid: book.BID});
+                            if(res.data === 1) count++;
+                        }
+                    }
+                    //alert(`${count}권 도서삭제!`);
+                    setBox({show: true, message: `${count}권 도서삭제!`});
+                    navi(`${path}?page=1&query=${query}&size=${size}`);
+                }
+           })
         }
     }
 
@@ -113,7 +154,7 @@ const BookList = () => {
                     </form>
                 </Col>
                 <Col className='mt-1'>검색수: {total}권</Col>
-                <Col className='text-end'><Button size="sm" onClick={onChangeDelete} variant='secondary'>선택삭제</Button></Col>
+                <Col className='text-end'><Button size="sm" onClick={onClickDelete} variant='secondary'>선택삭제</Button></Col>
             </Row>
             <hr/>
             <Table>
@@ -160,7 +201,7 @@ const BookList = () => {
                     prevPageText={"‹"}
                     nextPageText={"›"}
                     onChange={ onChangePage }/>
-            }    
+            }
         </div>
     )
 }
