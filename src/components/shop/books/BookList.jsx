@@ -79,7 +79,6 @@ const BookList = () => {
         })
     }
 
-    
     //삭제 checkbox
 
     const onChangeAll = (e) => {
