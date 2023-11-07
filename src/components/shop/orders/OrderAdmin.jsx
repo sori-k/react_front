@@ -1,12 +1,14 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Spinner, Table, Row, Col, InputGroup, Form, Button } from 'react-bootstrap';
 import OrderModal from './OrderModal';
 import Pagination from 'react-js-pagination';
 import '../Pagination.css';
+import { BoxContext } from '../BoxContext';
 
 const OrderAdmin = () => {
+    const {setBox} = useContext(BoxContext);
     const [loading, setLoading] = useState(false);
     const [list, setList] = useState([]); //초기값 넣어주기 위한
     const [total, setTotal] = useState(0);
@@ -41,6 +43,24 @@ const OrderAdmin = () => {
         navi(`/orders/admin?page=1&size=${size}&query=${query}`);
     }
 
+    //상태변경 함수
+    const onChangeStatus = (e, pid) => {
+        const plist = list.map(p=> p.pid === pid ? {...p, status:e.target.value} : p);
+        setList(plist);
+    }
+
+    //변경버튼을 눌렀을때
+    const onClickChange = (pid, status) => {
+        setBox({
+            show: true,
+            message: `${pid}번 주문상태를 ${status}로 변경할까요?`,
+            action: async() => {
+                await axios.post('/orders/update', {pid, status}); //body로 받을땐 {}, query로 받을땐 ? 로
+                getList();
+            }
+        });
+    }
+
     if(loading) return <div className='text-center my-5'><Spinner/></div>
     return (
         <div className='my-5'>
@@ -66,6 +86,7 @@ const OrderAdmin = () => {
                         <th>전화</th>
                         <th>금액</th>
                         <th>주문상태</th>
+                        <th>상태변경</th>
                         <th>주문상품</th>
                     </tr>
                 </thead>
@@ -77,6 +98,20 @@ const OrderAdmin = () => {
                             <td>{p.rphone}</td>
                             <td className='text-end'>{p.fmtsum}원</td>
                             <td>{p.str_status}</td>
+                            <td>
+                                <InputGroup>
+                                    <Form.Select value={p.status} onChange={(e)=> onChangeStatus(e, p.pid)}>
+                                        <option value="0">결제확인중</option>
+                                        <option value="1">결제확인</option>
+                                        <option value="2">배송준비중</option>
+                                        <option value="3">배송중</option>
+                                        <option value="4">배송완료</option>
+                                        <option value="5">주문완료</option>
+                                    </Form.Select>
+                                    <Button onClick={(e)=> onClickChange(p.pid, p.status)}
+                                        variant='outline-danger' size="sm">변경</Button>
+                                </InputGroup>
+                            </td>
                             <td><OrderModal purchase={p} sum={p.fmtsum}/></td>
                             {/* 받을때는 purchase로 받아야함 */}
                         </tr>
